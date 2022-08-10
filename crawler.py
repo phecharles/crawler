@@ -1,9 +1,12 @@
 import requests
+import threading
 import re
 from bs4 import BeautifulSoup
 
 DOMINIO = "https://django-anuncios.solyd.com.br"
 URL_AUTOMOVEIS = "https://django-anuncios.solyd.com.br/automoveis/"
+LINKS = []
+TELEFONES = []
 
 def requisicao(url):
     try:
@@ -54,17 +57,47 @@ def encontrar_telefone(soup):
     if regex:
         return regex
 
-resposta = requisicao(URL_AUTOMOVEIS)
-if resposta:
-    soup_busca = parsing(resposta)
-    if soup_busca:
-        links = encontrar_links(soup_busca)
-        i=0
-        for link in links:
-            i = i + 1
-            resposta_anuncio = requisicao(DOMINIO + link)
-            if resposta_anuncio:
-                soup_anuncio = parsing(resposta_anuncio)
-                if soup_anuncio:
-                    print("{}º Anúncio: {}".format(i, encontrar_telefone(soup_anuncio)))
+
+def descobrir_telefones():
+    while True:
+        try:
+            link_anuncio = LINKS.pop(0)
+        except:
+            return None
+
+        resposta_anuncio = requisicao(DOMINIO + link_anuncio)
+
+        if resposta_anuncio:
+            soup_anuncio = parsing(resposta_anuncio)
+            if soup_anuncio:
+                telefones = encontrar_telefone(soup_anuncio)
+                if telefones:
+                    for tel in telefones:
+                        print("Telefone encontrado: {}".format(tel))
+                        TELEFONES.append(tel)
+
+#42:16
+if __name__ == "__main__":
+    resposta_busca = requisicao(URL_AUTOMOVEIS)
+    if resposta_busca:
+        soup_busca = parsing(resposta_busca)
+        if soup_busca:
+            LINKS = encontrar_links(soup_busca)
+
+            thread_1 = threading.Thread(target=descobrir_telefones)
+            thread_2 = threading.Thread(target=descobrir_telefones)
+            thread_3 = threading.Thread(target=descobrir_telefones)
+            thread_4 = threading.Thread(target=descobrir_telefones)
+
+            thread_1.start()
+            thread_2.start()
+            thread_3.start()
+            thread_4.start()
+
+            thread_1.join()
+            thread_2.join()
+            thread_3.join()
+            thread_4.join()
+
+            print(TELEFONES)
 
