@@ -84,20 +84,12 @@ if __name__ == "__main__":
         if soup_busca:
             LINKS = encontrar_links(soup_busca)
 
-            thread_1 = threading.Thread(target=descobrir_telefones)
-            thread_2 = threading.Thread(target=descobrir_telefones)
-            thread_3 = threading.Thread(target=descobrir_telefones)
-            thread_4 = threading.Thread(target=descobrir_telefones)
+            THREADS = []
+            for i in range(3):
+                t = threading.Thread(target=descobrir_telefones)
+                THREADS.append(t)
 
-            thread_1.start()
-            thread_2.start()
-            thread_3.start()
-            thread_4.start()
+            for t in THREADS:
+                t.start()
 
-            thread_1.join()
-            thread_2.join()
-            thread_3.join()
-            thread_4.join()
-
-            print(TELEFONES)
 
