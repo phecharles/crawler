@@ -1,5 +1,6 @@
 import requests
 import threading
+
 import re
 from bs4 import BeautifulSoup
 
@@ -75,6 +76,16 @@ def descobrir_telefones():
                     for tel in telefones:
                         print("Telefone encontrado: {}".format(tel))
                         TELEFONES.append(tel)
+                        salvar_telefones(tel)
+
+def salvar_telefones(tel):
+    try:
+        string_tels = "{}{}{}\n".format(tel[0][0],tel[1],tel[2])
+        with open("telefones.csv", "a") as arquivo:
+            arquivo.write(str(string_tels))
+    except Exception as error:
+        print("Erro ao salvar o telefone em CSV")
+        print(error)
 
 #42:16
 if __name__ == "__main__":
@@ -85,11 +96,14 @@ if __name__ == "__main__":
             LINKS = encontrar_links(soup_busca)
 
             THREADS = []
-            for i in range(3):
+            for i in range(10):
                 t = threading.Thread(target=descobrir_telefones)
                 THREADS.append(t)
 
             for t in THREADS:
                 t.start()
+
+            for t in THREADS:
+                t.join()
 
 
